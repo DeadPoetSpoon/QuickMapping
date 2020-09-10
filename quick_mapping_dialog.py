@@ -26,14 +26,17 @@ import os
 
 from qgis.PyQt import uic
 from qgis.PyQt import QtWidgets
+from qgis.core import *
 
-# This loads your .ui file so that PyQt can populate your plugin with the elements from Qt Designer
+# This loads your .ui file so that PyQt can populate your plugin
+# with the elements from Qt Designer
 FORM_CLASS, _ = uic.loadUiType(os.path.join(
     os.path.dirname(__file__), 'quick_mapping_dialog_base.ui'))
 
 
 class QuickMappingDialog(QtWidgets.QDialog, FORM_CLASS):
-    def __init__(self, parent=None):
+    """Main Dialog"""
+    def __init__(self, iface, parent=None):
         """Constructor."""
         super(QuickMappingDialog, self).__init__(parent)
         # Set up the user interface from Designer through FORM_CLASS.
@@ -42,3 +45,13 @@ class QuickMappingDialog(QtWidgets.QDialog, FORM_CLASS):
         # http://qt-project.org/doc/qt-4.8/designer-using-a-ui-file.html
         # #widgets-and-dialogs-with-auto-connect
         self.setupUi(self)
+        self.iface = iface
+        # connet
+        self.pb_loadmap.clicked.connect(lambda: self.getGeojson(self.le_search.text()))
+    def getGeojson(self, areaCode: str):
+        """Get GeoJson from https://geo.datav.aliyun.com/areas_v2/bound/"""
+        dataurl = 'https://geo.datav.aliyun.com/areas_v2/bound/'+ \
+                  areaCode+'_full.json'
+        self.iface.newProject(True)
+        layer = self.iface.addVectorLayer(dataurl,areaCode,"ogr")
+        self.textBrowser.setText(layer.sourceName())
