@@ -27,7 +27,8 @@ import os
 from qgis.PyQt import uic
 from qgis.PyQt import QtWidgets
 from qgis.core import *
-
+from qgis.gui import *
+import csv
 # This loads your .ui file so that PyQt can populate your plugin
 # with the elements from Qt Designer
 FORM_CLASS, _ = uic.loadUiType(os.path.join(
@@ -47,11 +48,52 @@ class QuickMappingDialog(QtWidgets.QDialog, FORM_CLASS):
         self.setupUi(self)
         self.iface = iface
         # connet
-        self.pb_loadmap.clicked.connect(lambda: self.getGeojson(self.le_search.text()))
-    def getGeojson(self, areaCode: str):
-        """Get GeoJson from https://geo.datav.aliyun.com/areas_v2/bound/"""
-        dataurl = 'https://geo.datav.aliyun.com/areas_v2/bound/'+ \
-                  areaCode+'_full.json'
-        self.iface.newProject(True)
-        layer = self.iface.addVectorLayer(dataurl,areaCode,"ogr")
-        self.textBrowser.setText(layer.sourceName())
+        self.pb_loadmap.clicked.connect(lambda: 
+            self.getGeojson(self.le_search.text()))
+        # load AreaCode
+        self.areaCode = []
+        self.areaName = []
+        with open(os.path.join(os.path.dirname(__file__), 
+            'static/ChinaAreaCode.csv'),'r')as f:
+            for row in csv.reader(f):
+                self.areaCode.append(row[0])
+                self.areaName.append(row[1])
+    def getUrl(self, area: str):
+        """Get GeoJson from https://geo.datav.aliyun.com/areas_v2/bound/
+           Tool https://datav.aliyun.com/tools/atlas/"""
+        # code?
+        if area in self.areaCode:
+            if area[4:6] == "00":
+                if self.cb_include.isChecked():
+                    dataurl = 'https://geo.datav.aliyun.com/areas_v2/bound/'+ \
+                        area+'_full.json'
+                else:
+                    dataurl = 'https://geo.datav.aliyun.com/areas_v2/bound/'+ \
+                        area+'.json'
+            else:
+                dataurl = 'https://geo.datav.aliyun.com/areas_v2/bound/'+ \
+                  area+'.json'
+        # name?
+        elif area in self.areaName:
+            area = self.areaCode[self.areaName.index(area)]
+            if area[4:6] == "00":
+                if self.cb_include.isChecked():
+                    dataurl = 'https://geo.datav.aliyun.com/areas_v2/bound/'+ \
+                    area+'_full.json'
+                else:
+                    dataurl = 'https://geo.datav.aliyun.com/areas_v2/bound/'+ \
+                        area+'.json'
+            else:
+                dataurl = 'https://geo.datav.aliyun.com/areas_v2/bound/'+ \
+                  area+'.json'
+        else:
+            dataurl = ""
+        return dataurl
+    def getGeojson(self, area: str):
+        """Get Json"""
+        dataurl = self.getUrl(area)
+        if dataurl != "":
+            self.iface.newProject(True)
+            layer = self.iface.addVectorLayer(dataurl,area,"ogr")
+        else:
+            QgsErrorDialog.show(QgsError("地区不存在，或地区名不完整。","Quick Mapping"),"Error")

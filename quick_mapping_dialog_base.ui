@@ -6,97 +6,75 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>766</width>
+    <width>365</width>
     <height>508</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Quick Mapping</string>
+   <string>快速制图</string>
   </property>
-  <widget class="QWidget" name="layoutWidget">
-   <property name="geometry">
-    <rect>
-     <x>10</x>
-     <y>20</y>
-     <width>741</width>
-     <height>461</height>
-    </rect>
-   </property>
-   <layout class="QGridLayout" name="gridLayout">
-    <item row="0" column="1">
-     <widget class="QLineEdit" name="le_search"/>
-    </item>
-    <item row="0" column="2">
-     <widget class="QPushButton" name="pb_loadmap">
-      <property name="text">
-       <string>选择地图区域</string>
-      </property>
-     </widget>
-    </item>
-    <item row="1" column="1" colspan="2">
-     <widget class="QFrame" name="frame_map">
-      <property name="frameShape">
-       <enum>QFrame::StyledPanel</enum>
-      </property>
-      <property name="frameShadow">
-       <enum>QFrame::Raised</enum>
-      </property>
-      <widget class="QTextBrowser" name="textBrowser">
+  <layout class="QGridLayout" name="gridLayout">
+   <item row="1" column="0" colspan="2">
+    <widget class="QTabWidget" name="tabWidget">
+     <property name="currentIndex">
+      <number>0</number>
+     </property>
+     <widget class="QWidget" name="attr">
+      <attribute name="title">
+       <string>属性</string>
+      </attribute>
+      <widget class="QPushButton" name="pb_addAttr">
        <property name="geometry">
         <rect>
          <x>10</x>
          <y>10</y>
-         <width>511</width>
-         <height>401</height>
+         <width>201</width>
+         <height>28</height>
         </rect>
+       </property>
+       <property name="text">
+        <string>添加额外属性</string>
        </property>
       </widget>
      </widget>
-    </item>
-    <item row="1" column="0">
-     <widget class="QToolBox" name="toolBox">
-      <property name="maximumSize">
-       <size>
-        <width>200</width>
-        <height>16777215</height>
-       </size>
-      </property>
-      <property name="frameShape">
-       <enum>QFrame::Box</enum>
-      </property>
-      <property name="currentIndex">
-       <number>0</number>
-      </property>
-      <widget class="QWidget" name="page">
-       <property name="geometry">
-        <rect>
-         <x>0</x>
-         <y>0</y>
-         <width>198</width>
-         <height>370</height>
-        </rect>
-       </property>
-       <attribute name="label">
-        <string>Page 1</string>
-       </attribute>
-      </widget>
-      <widget class="QWidget" name="page_2">
-       <property name="geometry">
-        <rect>
-         <x>0</x>
-         <y>0</y>
-         <width>198</width>
-         <height>370</height>
-        </rect>
-       </property>
-       <attribute name="label">
-        <string>Page 2</string>
-       </attribute>
-      </widget>
+     <widget class="QWidget" name="symbol">
+      <attribute name="title">
+       <string>符号化</string>
+      </attribute>
      </widget>
-    </item>
-   </layout>
-  </widget>
+    </widget>
+   </item>
+   <item row="0" column="0">
+    <widget class="QLineEdit" name="le_search">
+     <property name="inputMask">
+      <string/>
+     </property>
+     <property name="placeholderText">
+      <string>中国6位地区码或完整地区名</string>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="1">
+    <widget class="QCheckBox" name="cb_include">
+     <property name="text">
+      <string>包含子地区</string>
+     </property>
+     <property name="checked">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="0" colspan="2">
+    <widget class="QPushButton" name="pb_loadmap">
+     <property name="text">
+      <string>快速出图</string>
+     </property>
+     <property name="checkable">
+      <bool>false</bool>
+     </property>
+    </widget>
+   </item>
+  </layout>
  </widget>
  <resources/>
  <connections/>
