@@ -6,55 +6,15 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>365</width>
-    <height>508</height>
+    <width>352</width>
+    <height>358</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>快速制图</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
-   <item row="1" column="0" colspan="2">
-    <widget class="QTabWidget" name="tabWidget">
-     <property name="currentIndex">
-      <number>0</number>
-     </property>
-     <widget class="QWidget" name="attr">
-      <attribute name="title">
-       <string>属性</string>
-      </attribute>
-      <widget class="QPushButton" name="pb_addAttr">
-       <property name="geometry">
-        <rect>
-         <x>10</x>
-         <y>10</y>
-         <width>201</width>
-         <height>28</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>添加额外属性</string>
-       </property>
-      </widget>
-     </widget>
-     <widget class="QWidget" name="symbol">
-      <attribute name="title">
-       <string>符号化</string>
-      </attribute>
-     </widget>
-    </widget>
-   </item>
-   <item row="0" column="0">
-    <widget class="QLineEdit" name="le_search">
-     <property name="inputMask">
-      <string/>
-     </property>
-     <property name="placeholderText">
-      <string>中国6位地区码或完整地区名</string>
-     </property>
-    </widget>
-   </item>
-   <item row="0" column="1">
+   <item row="1" column="2">
     <widget class="QCheckBox" name="cb_include">
      <property name="text">
       <string>包含子地区</string>
@@ -64,13 +24,110 @@
      </property>
     </widget>
    </item>
-   <item row="2" column="0" colspan="2">
+   <item row="1" column="3">
     <widget class="QPushButton" name="pb_loadmap">
      <property name="text">
-      <string>快速出图</string>
+      <string>加载地图</string>
      </property>
      <property name="checkable">
       <bool>false</bool>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="0" colspan="2">
+    <widget class="QComboBox" name="cbb_search">
+     <property name="editable">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="0" colspan="4">
+    <widget class="QTabWidget" name="tabWidget">
+     <property name="currentIndex">
+      <number>0</number>
+     </property>
+     <widget class="QWidget" name="attr">
+      <attribute name="title">
+       <string>属性链接</string>
+      </attribute>
+      <layout class="QGridLayout" name="gridLayout_2">
+       <item row="4" column="2">
+        <widget class="QComboBox" name="cbb_targetfield"/>
+       </item>
+       <item row="3" column="0">
+        <widget class="QLabel" name="l_joinlayerField">
+         <property name="text">
+          <string>选择链接字段：</string>
+         </property>
+        </widget>
+       </item>
+       <item row="5" column="2">
+        <widget class="QLineEdit" name="le_pre"/>
+       </item>
+       <item row="4" column="0">
+        <widget class="QLabel" name="label_2">
+         <property name="text">
+          <string>选择目标字段：</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="0" colspan="3">
+        <widget class="QPushButton" name="pb_join">
+         <property name="text">
+          <string>选择文件</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="2">
+        <widget class="QComboBox" name="cbb_joinfield"/>
+       </item>
+       <item row="1" column="0">
+        <widget class="QCheckBox" name="cb_dynamic">
+         <property name="text">
+          <string>动态表单</string>
+         </property>
+         <property name="checked">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="5" column="0">
+        <widget class="QLabel" name="label">
+         <property name="text">
+          <string>字段前缀：</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="2">
+        <widget class="QCheckBox" name="cb_editable">
+         <property name="text">
+          <string>链接表是否可编辑</string>
+         </property>
+         <property name="checked">
+          <bool>false</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="6" column="0" colspan="3">
+        <widget class="QPushButton" name="pb_joinattr">
+         <property name="text">
+          <string>连接</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="symbol">
+      <attribute name="title">
+       <string>符号化</string>
+      </attribute>
+     </widget>
+    </widget>
+   </item>
+   <item row="0" column="0">
+    <widget class="QLabel" name="label_3">
+     <property name="text">
+      <string>地区6位码或完整名↓</string>
      </property>
     </widget>
    </item>

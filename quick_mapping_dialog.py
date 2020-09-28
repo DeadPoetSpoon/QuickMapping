@@ -23,12 +23,14 @@
 """
 
 import os
+import csv
 
 from qgis.PyQt import uic
 from qgis.PyQt import QtWidgets
+from qgis.PyQt.QtWidgets import QFileDialog
 from qgis.core import *
 from qgis.gui import *
-import csv
+
 # This loads your .ui file so that PyQt can populate your plugin
 # with the elements from Qt Designer
 FORM_CLASS, _ = uic.loadUiType(os.path.join(
@@ -37,6 +39,7 @@ FORM_CLASS, _ = uic.loadUiType(os.path.join(
 
 class QuickMappingDialog(QtWidgets.QDialog, FORM_CLASS):
     """Main Dialog"""
+
     def __init__(self, iface, parent=None):
         """Constructor."""
         super(QuickMappingDialog, self).__init__(parent)
@@ -47,17 +50,30 @@ class QuickMappingDialog(QtWidgets.QDialog, FORM_CLASS):
         # #widgets-and-dialogs-with-auto-connect
         self.setupUi(self)
         self.iface = iface
+        self.layer = None
+        self.joinlayer = None
         # connet
-        self.pb_loadmap.clicked.connect(lambda: 
-            self.getGeojson(self.le_search.text()))
+        # loadmap
+        self.pb_loadmap.clicked.connect(lambda:
+            self.addLayer(self.cbb_search.currentText()))
+        # join
+        self.pb_join.clicked.connect(lambda:
+            self.joinItems(QFileDialog.getOpenFileName(self,
+                "Open Join Table",
+                "/home",
+                "table(*.csv *.xlsx)")[0]))
         # load AreaCode
         self.areaCode = []
         self.areaName = []
-        with open(os.path.join(os.path.dirname(__file__), 
-            'static/ChinaAreaCode.csv'),'r')as f:
+        with open(os.path.join(os.path.dirname(__file__),
+                               'static/ChinaAreaCode.csv'), 'r')as f:
             for row in csv.reader(f):
                 self.areaCode.append(row[0])
                 self.areaName.append(row[1])
+        self.cbb_search.addItems(self.areaCode)
+        self.cbb_search.addItems(self.areaName)
+        # init QgsMessageBar
+        self.msgBar = iface.messageBar()
     def getUrl(self, area: str):
         """Get GeoJson from https://geo.datav.aliyun.com/areas_v2/bound/
            Tool https://datav.aliyun.com/tools/atlas/"""
@@ -65,35 +81,84 @@ class QuickMappingDialog(QtWidgets.QDialog, FORM_CLASS):
         if area in self.areaCode:
             if area[4:6] == "00":
                 if self.cb_include.isChecked():
-                    dataurl = 'https://geo.datav.aliyun.com/areas_v2/bound/'+ \
+                    dataurl = 'https://geo.datav.aliyun.com/areas_v2/bound/' + \
                         area+'_full.json'
                 else:
-                    dataurl = 'https://geo.datav.aliyun.com/areas_v2/bound/'+ \
+                    dataurl = 'https://geo.datav.aliyun.com/areas_v2/bound/' + \
                         area+'.json'
             else:
-                dataurl = 'https://geo.datav.aliyun.com/areas_v2/bound/'+ \
-                  area+'.json'
+                dataurl = 'https://geo.datav.aliyun.com/areas_v2/bound/' + \
+                    area+'.json'
         # name?
         elif area in self.areaName:
             area = self.areaCode[self.areaName.index(area)]
             if area[4:6] == "00":
                 if self.cb_include.isChecked():
-                    dataurl = 'https://geo.datav.aliyun.com/areas_v2/bound/'+ \
-                    area+'_full.json'
+                    dataurl = 'https://geo.datav.aliyun.com/areas_v2/bound/' + \
+                        area+'_full.json'
                 else:
-                    dataurl = 'https://geo.datav.aliyun.com/areas_v2/bound/'+ \
+                    dataurl = 'https://geo.datav.aliyun.com/areas_v2/bound/' + \
                         area+'.json'
             else:
-                dataurl = 'https://geo.datav.aliyun.com/areas_v2/bound/'+ \
-                  area+'.json'
+                dataurl = 'https://geo.datav.aliyun.com/areas_v2/bound/' + \
+                    area+'.json'
         else:
             dataurl = ""
         return dataurl
-    def getGeojson(self, area: str):
-        """Get Json"""
+
+    def joinItems(self, filePath: str):
+        """set join layer items"""
+        if self.layer is not None:
+            self.joinlayer = self.iface.addVectorLayer(
+                filePath, "joinlayer", "ogr")
+            if self.joinlayer is not None:
+                # Add joinfield combobox
+                for i in range(self.cbb_joinfield.count()-1, -1, -1):
+                    self.cbb_joinfield.removeItem(i)
+                for col in self.joinlayer.attributeTableConfig().columns():
+                    self.cbb_joinfield.addItem(col.name)
+                # set prefix
+                self.le_pre.setText("joinlayer_")
+                #Add targetfield combobx
+                for i in range(self.cbb_targetfield.count()-1, -1, -1):
+                    self.cbb_targetfield.removeItem(i)
+                for col in self.layer.attributeTableConfig().columns():
+                    self.cbb_targetfield.addItem(col.name)
+                # connect
+                self.pb_joinattr.clicked.connect(lambda: self.join())
+            else:
+                self.showError("连接表打开失败！")
+        else:
+            self.showError("请先加载地图！")
+
+    def join(self):
+        """join layer"""
+        joininfo = QgsVectorLayerJoinInfo()
+        joininfo.setDynamicFormEnabled(self.cb_dynamic.isChecked())
+        joininfo.setEditable(self.cb_editable.isChecked())
+        joininfo.setJoinFieldName(self.cbb_joinfield.currentText())
+        joininfo.setJoinLayer(self.joinlayer)
+        joininfo.setPrefix(self.le_pre.text())
+        joininfo.setTargetFieldName(self.cbb_targetfield.currentText())
+        if self.layer.addJoin(joininfo):
+            self.showMsg("连接成功！")
+        else:
+            self.showError("连接失败！")
+    def addLayer(self, area: str):
+        """Main Method"""
+        # Get Json
         dataurl = self.getUrl(area)
         if dataurl != "":
             self.iface.newProject(True)
-            layer = self.iface.addVectorLayer(dataurl,area,"ogr")
+            self.layer = self.iface.addVectorLayer(dataurl, area, "ogr")
         else:
-            QgsErrorDialog.show(QgsError("地区不存在，或地区名不完整。","Quick Mapping"),"Error")
+            self.showError("地区不存在，或地区名不完整。")
+
+    def showError(self, msg: str):
+        """show error dialog"""
+        # QgsErrorDialog.show(
+        #     QgsError(msg, "Quick Mapping"), "Error")
+        self.msgBar.pushWarning("Quick Mapping",msg)
+    def showMsg(self, msg: str):
+        """show msg"""
+        self.msgBar.pushSuccess("Quick Mapping",msg)
