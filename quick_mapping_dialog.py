@@ -52,6 +52,8 @@ class QuickMappingDialog(QtWidgets.QDialog, FORM_CLASS):
         self.iface = iface
         self.layer = None
         self.joinlayer = None
+        self.categorizedSRWidget = None
+        # ============================================================
         # connet
         # loadmap
         self.pb_loadmap.clicked.connect(lambda:
@@ -62,10 +64,14 @@ class QuickMappingDialog(QtWidgets.QDialog, FORM_CLASS):
                 "Open Join Table",
                 "/home",
                 "table(*.csv *.xlsx)")[0]))
+        # style
+        self.pb_single.clicked.connect(self.singleSymbol)
+        # =============================================================
         # load AreaCode
+        self.dir = os.path.dirname(__file__)
         self.areaCode = []
         self.areaName = []
-        with open(os.path.join(os.path.dirname(__file__),
+        with open(os.path.join(self.dir,
                                'static/ChinaAreaCode.csv'), 'r')as f:
             for row in csv.reader(f):
                 self.areaCode.append(row[0])
@@ -105,7 +111,7 @@ class QuickMappingDialog(QtWidgets.QDialog, FORM_CLASS):
         else:
             dataurl = ""
         return dataurl
-
+    # ====================================================================
     def joinItems(self, filePath: str):
         """set join layer items"""
         if self.layer is not None:
@@ -115,17 +121,17 @@ class QuickMappingDialog(QtWidgets.QDialog, FORM_CLASS):
                 # Add joinfield combobox
                 for i in range(self.cbb_joinfield.count()-1, -1, -1):
                     self.cbb_joinfield.removeItem(i)
-                for col in self.joinlayer.attributeTableConfig().columns():
-                    self.cbb_joinfield.addItem(col.name)
+                for col in self.joinlayer.fields():
+                    self.cbb_joinfield.addItem(col.name())
                 # set prefix
                 self.le_pre.setText("joinlayer_")
                 #Add targetfield combobx
                 for i in range(self.cbb_targetfield.count()-1, -1, -1):
                     self.cbb_targetfield.removeItem(i)
-                for col in self.layer.attributeTableConfig().columns():
-                    self.cbb_targetfield.addItem(col.name)
+                for col in self.layer.fields():
+                    self.cbb_targetfield.addItem(col.name())
                 # connect
-                self.pb_joinattr.clicked.connect(lambda: self.join())
+                self.pb_joinattr.clicked.connect(self.join)
             else:
                 self.showError("连接表打开失败！")
         else:
@@ -144,6 +150,7 @@ class QuickMappingDialog(QtWidgets.QDialog, FORM_CLASS):
             self.showMsg("连接成功！")
         else:
             self.showError("连接失败！")
+    # =============================================================
     def addLayer(self, area: str):
         """Main Method"""
         # Get Json
@@ -153,7 +160,27 @@ class QuickMappingDialog(QtWidgets.QDialog, FORM_CLASS):
             self.layer = self.iface.addVectorLayer(dataurl, area, "ogr")
         else:
             self.showError("地区不存在，或地区名不完整。")
-
+    def singleSymbol(self):
+        if self.layer is None:
+            self.showError("请先加载地图！")
+            return
+        # 选择颜色
+        colorDlg = QgsColorDialog(self)
+        colorDlg.show()
+        colorDlg.exec_()
+        color = colorDlg.color().getRgbF()
+        renderer = self.layer.renderer()
+        symbol = QgsFillSymbol.createSimple({'color': color})
+        self.layer.renderer().setSymbol(symbol)
+        self.layer.triggerRepaint()
+        
+    def applySymbol(self):
+        self.categorizedSRWidget.renderer().startRender()
+        self.categorizedSRWidget.applyChangeToSymbol()
+        self.categorizedSRWidget.applyChanges()
+        self.categorizedSRWidget.renderer().stopRender()
+        self.layer.triggerRepaint()
+    # ===========================================================
     def showError(self, msg: str):
         """show error dialog"""
         # QgsErrorDialog.show(
@@ -162,3 +189,6 @@ class QuickMappingDialog(QtWidgets.QDialog, FORM_CLASS):
     def showMsg(self, msg: str):
         """show msg"""
         self.msgBar.pushSuccess("Quick Mapping",msg)
+    def showLog(self, log: str):
+        """show log"""
+        QgsMessageLog.logMessage(log, 'Quick Mapping', level=Qgis.Info)

@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>352</width>
+    <width>381</width>
     <height>358</height>
    </rect>
   </property>
@@ -44,7 +44,7 @@
    <item row="2" column="0" colspan="4">
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
-      <number>0</number>
+      <number>1</number>
      </property>
      <widget class="QWidget" name="attr">
       <attribute name="title">
@@ -121,6 +121,19 @@
       <attribute name="title">
        <string>符号化</string>
       </attribute>
+      <widget class="QPushButton" name="pb_single">
+       <property name="geometry">
+        <rect>
+         <x>0</x>
+         <y>0</y>
+         <width>351</width>
+         <height>28</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>简单填充</string>
+       </property>
+      </widget>
      </widget>
     </widget>
    </item>
