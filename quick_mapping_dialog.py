@@ -64,7 +64,7 @@ class QuickMappingDialog(QtWidgets.QDialog, FORM_CLASS):
             self.joinItems(QFileDialog.getOpenFileName(self,
                 "Open Join Table",
                 "/home",
-                "table(*.csv *.xlsx)")[0]))
+                "table(*.csv *.xls *.xlsx)")[0]))
         # style
         self.rendererDlg = None
         self.pb_symbolize.clicked.connect(self.symbolize)
@@ -100,30 +100,25 @@ class QuickMappingDialog(QtWidgets.QDialog, FORM_CLASS):
         """Get GeoJson from https://geo.datav.aliyun.com/areas_v2/bound/
            Tool https://datav.aliyun.com/tools/atlas/"""
         # code?
+        purl = 'https://geo.datav.aliyun.com/areas_v2/bound/'
         if area in self.areaCode:
             if area[4:6] == "00":
                 if self.cb_include.isChecked():
-                    dataurl = 'https://geo.datav.aliyun.com/areas_v2/bound/' + \
-                        area+'_full.json'
+                    dataurl = purl+area+'_full.json'
                 else:
-                    dataurl = 'https://geo.datav.aliyun.com/areas_v2/bound/' + \
-                        area+'.json'
+                    dataurl = purl+area+'.json'
             else:
-                dataurl = 'https://geo.datav.aliyun.com/areas_v2/bound/' + \
-                    area+'.json'
+                dataurl = purl+area+'.json'
         # name?
         elif area in self.areaName:
             area = self.areaCode[self.areaName.index(area)]
             if area[4:6] == "00":
                 if self.cb_include.isChecked():
-                    dataurl = 'https://geo.datav.aliyun.com/areas_v2/bound/' + \
-                        area+'_full.json'
+                    dataurl = purl+area+'_full.json'
                 else:
-                    dataurl = 'https://geo.datav.aliyun.com/areas_v2/bound/' + \
-                        area+'.json'
+                    dataurl = purl+area+'.json'
             else:
-                dataurl = 'https://geo.datav.aliyun.com/areas_v2/bound/' + \
-                    area+'.json'
+                dataurl = purl+area+'.json'
         else:
             dataurl = ""
         return dataurl
@@ -236,7 +231,7 @@ class QuickMappingDialog(QtWidgets.QDialog, FORM_CLASS):
         if error[0] == QgsVectorFileWriter.NoError:
             self.showMsg("导出成功!")
         else:
-            self.showError(error)
+            self.showError(error[1])
     # ===========================================================
     def printlayout(self):
         """layout"""
@@ -251,12 +246,12 @@ class QuickMappingDialog(QtWidgets.QDialog, FORM_CLASS):
             self.layout.initializeDefaults()
             self.layout.setName(self.le_layoutname.text())
         # can not add right map QAQ
-        # mmap = QgsLayoutItemMap(self.layout)
-        # mmap.setLayers([self.layer])
+        mmap = QgsLayoutItemMap(self.layout)
+        mmap.setLayers([self.layer])
         # mmap.setExtent(self.layer.extent())
         # mmap.setCrs(self.layer.sourceCrs())
-        # mmap.attemptMove(QgsLayoutPoint(6, 10, QgsUnitTypes.LayoutMillimeters))
-        # mmap.attemptResize(QgsLayoutSize(90, 80, QgsUnitTypes.LayoutMillimeters))
+        mmap.attemptMove(QgsLayoutPoint(6, 10, QgsUnitTypes.LayoutMillimeters))
+        mmap.attemptResize(QgsLayoutSize(90, 80, QgsUnitTypes.LayoutMillimeters))
         # self.layout.addLayoutItem(mmap)
         if self.cb_mapname.isChecked():
             label = QgsLayoutItemLabel(self.layout)
